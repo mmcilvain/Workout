@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
 export type MediaType = "image" | "gif" | "video";
 
 export interface MediaDemoProps {
   type?: MediaType | string;
   src?: string;
+  fallbackSrc?: string;
   alt?: string;
   caption?: string;
   className?: string;
@@ -22,13 +23,16 @@ function isUsableMediaSource(src: MediaDemoProps["src"]) {
 
 export function MediaFallback({
   message = "Media preview unavailable",
+  className,
 }: {
   message?: string;
+  className?: string;
 }) {
   return (
     <div
       role="img"
       aria-label={message}
+      className={className}
       style={{
         alignItems: "center",
         background: "linear-gradient(135deg, #f3f4f6, #e5e7eb)",
@@ -59,33 +63,53 @@ export function MediaFallback({
 export function MediaDemo({
   type,
   src,
+  fallbackSrc,
   alt = "Exercise demonstration",
   caption,
   className,
 }: MediaDemoProps) {
+  const [activeSrc, setActiveSrc] = useState(src);
   const [hasError, setHasError] = useState(false);
+  const canUseFallbackSource =
+    isUsableMediaSource(fallbackSrc) && fallbackSrc !== activeSrc;
+  const displayType = activeSrc?.startsWith("data:image/") ? "image" : type;
 
   useEffect(() => {
+    setActiveSrc(src);
     setHasError(false);
-  }, [src, type]);
+  }, [src, type, fallbackSrc]);
 
   const fallbackMessage = useMemo(() => {
-    if (!isUsableMediaSource(src)) {
+    if (!isUsableMediaSource(activeSrc)) {
       return "No media has been provided for this exercise.";
     }
 
-    if (!isSupportedMediaType(type)) {
+    if (!isSupportedMediaType(displayType)) {
       return "This media type is not supported.";
     }
 
     return "This media could not be loaded.";
-  }, [src, type]);
+  }, [activeSrc, displayType]);
 
-  if (!isUsableMediaSource(src) || !isSupportedMediaType(type) || hasError) {
-    return <MediaFallback message={fallbackMessage} />;
+  const handleMediaError = () => {
+    if (canUseFallbackSource) {
+      setActiveSrc(fallbackSrc);
+      setHasError(false);
+      return;
+    }
+
+    setHasError(true);
+  };
+
+  if (
+    !isUsableMediaSource(activeSrc) ||
+    !isSupportedMediaType(displayType) ||
+    hasError
+  ) {
+    return <MediaFallback className={className} message={fallbackMessage} />;
   }
 
-  const sharedMediaStyles: React.CSSProperties = {
+  const sharedMediaStyles: CSSProperties = {
     aspectRatio: "16 / 9",
     background: "#111827",
     borderRadius: 16,
@@ -96,20 +120,20 @@ export function MediaDemo({
 
   return (
     <figure className={className} style={{ margin: 0 }}>
-      {type === "video" ? (
+      {displayType === "video" ? (
         <video
           aria-label={alt}
           controls
-          onError={() => setHasError(true)}
+          onError={handleMediaError}
           preload="metadata"
-          src={src}
+          src={activeSrc}
           style={sharedMediaStyles}
         />
       ) : (
         <img
           alt={alt}
-          onError={() => setHasError(true)}
-          src={src}
+          onError={handleMediaError}
+          src={activeSrc}
           style={sharedMediaStyles}
         />
       )}

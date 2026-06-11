@@ -17,8 +17,17 @@ function formatPrescription(exercise: WorkoutExercise) {
   return pieces.length > 0 ? pieces.join(' • ') : 'Move for quality reps'
 }
 
+function createExerciseId(name: string) {
+  return `exercise-${name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')}`
+}
+
 export function ExerciseCard({ exercise }: ExerciseCardProps) {
   const media = resolveExerciseMedia(exercise)
+  const instructionsId = `${createExerciseId(exercise.name)}-instructions`
 
   return (
     <article
@@ -28,6 +37,7 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
         <MediaDemo
           alt={`${exercise.name} demonstration`}
           caption={`${exercise.mediaType.toUpperCase()} demonstration`}
+          fallbackSrc={media.fallbackUrl}
           src={media.url}
           type={media.type}
         />
@@ -69,10 +79,10 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
             </div>
           </dl>
 
-          <section aria-labelledby={`${exercise.name}-instructions`}>
+          <section aria-labelledby={instructionsId}>
             <h4
               className="m-0 mb-2 text-base font-bold text-slate-900"
-              id={`${exercise.name}-instructions`}
+              id={instructionsId}
             >
               Instructions
             </h4>

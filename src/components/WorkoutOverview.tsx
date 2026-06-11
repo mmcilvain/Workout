@@ -1,255 +1,96 @@
-import React from "react";
-import ExerciseCard, { Exercise } from "./ExerciseCard";
-
-export interface WorkoutRoutine {
-  title: string;
-  estimatedDuration: string;
-  difficulty: "Beginner" | "Intermediate" | "Advanced" | string;
-  equipment: string[];
-  warmUp: Exercise[];
-  mainWorkout: Exercise[];
-  cooldown: Exercise[];
-}
+import ExerciseCard from './ExerciseCard'
+import { workouts } from '../data/workouts'
+import type { WorkoutExercise, WorkoutRoutine } from '../types/workout'
 
 export interface WorkoutOverviewProps {
-  workout?: WorkoutRoutine;
+  workout?: WorkoutRoutine
 }
 
-export const sampleWorkout: WorkoutRoutine = {
-  title: "Full-Body Strength Foundation",
-  estimatedDuration: "38 minutes",
-  difficulty: "Beginner",
-  equipment: ["Mat", "Pair of dumbbells", "Chair or bench"],
-  warmUp: [
-    {
-      id: "march-and-reach",
-      name: "March and Overhead Reach",
-      muscleGroup: "Full body warm-up",
-      instructions: [
-        "March in place with a tall chest and relaxed shoulders.",
-        "Reach both arms overhead every four steps.",
-        "Gradually increase your pace while keeping your breathing easy.",
-      ],
-      time: "3 minutes",
-      rest: "None",
-      media: { type: "image", src: "", caption: "Warm-up movement preview" },
-      beginnerModification:
-        "Keep the arms at shoulder height if overhead reaching is uncomfortable.",
-      safetyTip:
-        "Land softly and keep your knees tracking in line with your toes.",
-    },
-  ],
-  mainWorkout: [
-    {
-      id: "goblet-squat",
-      name: "Goblet Squat",
-      muscleGroup: "Quads, glutes, core",
-      instructions: [
-        "Hold one dumbbell at chest height with elbows close to your ribs.",
-        "Sit your hips back and lower until your thighs are near parallel to the floor.",
-        "Drive through your heels to stand tall and squeeze your glutes.",
-      ],
-      sets: 3,
-      reps: "8–10 reps",
-      rest: "60 seconds",
-      media: { type: "gif", src: "", caption: "Looped squat demonstration" },
-      beginnerModification:
-        "Squat to a chair and lightly tap it before standing.",
-      safetyTip:
-        "Keep your chest lifted and stop the set if your lower back rounds.",
-    },
-    {
-      id: "incline-push-up",
-      name: "Incline Push-Up",
-      muscleGroup: "Chest, shoulders, triceps",
-      instructions: [
-        "Place your hands on a sturdy bench or countertop slightly wider than your shoulders.",
-        "Step your feet back until your body forms a straight line.",
-        "Lower your chest toward the surface, then press away with control.",
-      ],
-      sets: 3,
-      reps: "8–12 reps",
-      rest: "60 seconds",
-      media: { type: "video", src: "", caption: "Pressing pattern video demo" },
-      beginnerModification:
-        "Use a higher surface to reduce the amount of body weight you press.",
-      safetyTip: "Brace your core so your hips do not sag during the movement.",
-    },
-  ],
-  cooldown: [
-    {
-      id: "childs-pose-breathing",
-      name: "Child's Pose Breathing",
-      muscleGroup: "Back, hips, shoulders",
-      instructions: [
-        "Kneel on the mat and sit your hips toward your heels.",
-        "Reach your arms forward and relax your forehead toward the floor.",
-        "Take slow nasal breaths and let your ribs expand with each inhale.",
-      ],
-      time: "2 minutes",
-      rest: "None",
-      media: { type: "image", src: "", caption: "Cooldown stretch preview" },
-      beginnerModification:
-        "Place a pillow between your hips and heels for support.",
-      safetyTip:
-        "Come out of the stretch slowly if you feel knee or hip discomfort.",
-    },
-  ],
-};
+const featuredWorkout = workouts[0]
 
-function WorkoutSection({
-  exercises,
-  title,
-}: {
-  exercises: Exercise[];
-  title: string;
-}) {
-  return (
-    <section
-      aria-labelledby={`${title.toLowerCase().replace(/\s+/g, "-")}-heading`}
-      style={{ display: "grid", gap: 16 }}
-    >
-      <h2
-        id={`${title.toLowerCase().replace(/\s+/g, "-")}-heading`}
-        style={{ color: "#111827", fontSize: 28, margin: 0 }}
-      >
-        {title}
-      </h2>
-      {exercises.map((exercise) => (
-        <ExerciseCard
-          exercise={exercise}
-          key={exercise.id ?? exercise.name}
-          phaseLabel={title}
-        />
-      ))}
-    </section>
-  );
-}
+function ExerciseSection({ exercises }: { exercises: WorkoutExercise[] }) {
+  const exercisesByCategory = exercises.reduce(
+    (groups, exercise) => {
+      const categoryExercises = groups.get(exercise.category) ?? []
+      categoryExercises.push(exercise)
+      groups.set(exercise.category, categoryExercises)
+      return groups
+    },
+    new Map<WorkoutExercise['category'], WorkoutExercise[]>(),
+  )
 
-export function WorkoutOverview({
-  workout = sampleWorkout,
-}: WorkoutOverviewProps) {
   return (
-    <main
-      style={{
-        background: "#f8fafc",
-        minHeight: "100vh",
-        padding: "40px 20px",
-      }}
-    >
-      <div
-        style={{ display: "grid", gap: 28, margin: "0 auto", maxWidth: 1120 }}
-      >
-        <header
-          style={{
-            background: "linear-gradient(135deg, #1d4ed8, #7c3aed)",
-            borderRadius: 28,
-            boxShadow: "0 24px 60px rgba(30, 64, 175, 0.25)",
-            color: "#ffffff",
-            padding: 32,
-          }}
+    <div className="grid gap-6">
+      {[...exercisesByCategory.entries()].map(([category, categoryExercises]) => (
+        <section
+          aria-labelledby={`${category.toLowerCase().replace(/\s+/g, '-')}-heading`}
+          className="grid gap-4"
+          key={category}
         >
-          <p
-            style={{
-              fontSize: 14,
-              fontWeight: 800,
-              letterSpacing: "0.12em",
-              margin: "0 0 10px",
-              textTransform: "uppercase",
-            }}
+          <h2
+            className="m-0 text-3xl font-bold text-slate-900"
+            id={`${category.toLowerCase().replace(/\s+/g, '-')}-heading`}
           >
-            Workout routine
+            {category}
+          </h2>
+          {categoryExercises.map((exercise) => (
+            <ExerciseCard exercise={exercise} key={exercise.name} />
+          ))}
+        </section>
+      ))}
+    </div>
+  )
+}
+
+export function WorkoutOverview({ workout = featuredWorkout }: WorkoutOverviewProps) {
+  return (
+    <main className="min-h-screen bg-slate-50 px-5 py-10">
+      <div className="mx-auto grid max-w-6xl gap-7">
+        <header className="rounded-[1.75rem] bg-gradient-to-br from-blue-700 to-violet-700 p-8 text-white shadow-2xl shadow-blue-900/25">
+          <p className="m-0 mb-2.5 text-sm font-extrabold uppercase tracking-[0.12em] text-blue-100">
+            {workout.category} workout routine
           </p>
-          <h1 style={{ fontSize: 44, lineHeight: 1.05, margin: 0 }}>
-            {workout.title}
-          </h1>
-          <dl
-            style={{
-              display: "grid",
-              gap: 14,
-              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-              margin: "28px 0 0",
-            }}
-          >
-            <div
-              style={{
-                background: "rgba(255, 255, 255, 0.16)",
-                borderRadius: 16,
-                padding: 16,
-              }}
-            >
-              <dt
-                style={{
-                  fontSize: 13,
-                  fontWeight: 800,
-                  opacity: 0.8,
-                  textTransform: "uppercase",
-                }}
-              >
+          <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
+            <div className="grid gap-3">
+              <h1 className="m-0 text-5xl font-bold leading-none tracking-tight">
+                {workout.title}
+              </h1>
+              <p className="m-0 max-w-3xl text-lg leading-8 text-blue-50">
+                {workout.description}
+              </p>
+            </div>
+            <span className="w-fit rounded-full bg-white/20 px-4 py-2 text-sm font-extrabold uppercase tracking-wide">
+              {workout.difficulty}
+            </span>
+          </div>
+
+          <dl className="m-0 mt-7 grid gap-3 md:grid-cols-3">
+            <div className="rounded-2xl bg-white/15 p-4">
+              <dt className="text-xs font-extrabold uppercase text-blue-100">
                 Estimated duration
               </dt>
-              <dd style={{ fontSize: 20, fontWeight: 800, margin: "6px 0 0" }}>
+              <dd className="m-0 mt-1.5 text-xl font-extrabold">
                 {workout.estimatedDuration}
               </dd>
             </div>
-            <div
-              style={{
-                background: "rgba(255, 255, 255, 0.16)",
-                borderRadius: 16,
-                padding: 16,
-              }}
-            >
-              <dt
-                style={{
-                  fontSize: 13,
-                  fontWeight: 800,
-                  opacity: 0.8,
-                  textTransform: "uppercase",
-                }}
-              >
-                Difficulty
+            <div className="rounded-2xl bg-white/15 p-4">
+              <dt className="text-xs font-extrabold uppercase text-blue-100">
+                Exercises
               </dt>
-              <dd style={{ fontSize: 20, fontWeight: 800, margin: "6px 0 0" }}>
-                {workout.difficulty}
+              <dd className="m-0 mt-1.5 text-xl font-extrabold">
+                {workout.exercises.length} movements
               </dd>
             </div>
-            <div
-              style={{
-                background: "rgba(255, 255, 255, 0.16)",
-                borderRadius: 16,
-                padding: 16,
-              }}
-            >
-              <dt
-                style={{
-                  fontSize: 13,
-                  fontWeight: 800,
-                  opacity: 0.8,
-                  textTransform: "uppercase",
-                }}
-              >
+            <div className="rounded-2xl bg-white/15 p-4">
+              <dt className="text-xs font-extrabold uppercase text-blue-100">
                 Equipment
               </dt>
-              <dd style={{ margin: "8px 0 0" }}>
-                <ul
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 8,
-                    listStyle: "none",
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+              <dd className="m-0 mt-2">
+                <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
                   {workout.equipment.map((item) => (
                     <li
+                      className="rounded-full bg-white/20 px-2.5 py-1.5 text-sm font-bold"
                       key={item}
-                      style={{
-                        background: "rgba(255, 255, 255, 0.22)",
-                        borderRadius: 999,
-                        fontWeight: 700,
-                        padding: "6px 10px",
-                      }}
                     >
                       {item}
                     </li>
@@ -260,12 +101,10 @@ export function WorkoutOverview({
           </dl>
         </header>
 
-        <WorkoutSection exercises={workout.warmUp} title="Warm-up" />
-        <WorkoutSection exercises={workout.mainWorkout} title="Main workout" />
-        <WorkoutSection exercises={workout.cooldown} title="Cooldown" />
+        <ExerciseSection exercises={workout.exercises} />
       </div>
     </main>
-  );
+  )
 }
 
-export default WorkoutOverview;
+export default WorkoutOverview

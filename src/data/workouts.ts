@@ -822,10 +822,10 @@ export const workouts: WorkoutRoutine[] = [
   },
 ];
 
-export const workoutsByCategory = workouts.reduce(
+export const workoutsByCategory = workouts.reduce<Partial<Record<WorkoutRoutine['category'], WorkoutRoutine>>>(
   (accumulator, workout) => {
     accumulator[workout.category] = workout;
     return accumulator;
   },
-  {} as Record<WorkoutRoutine['category'], WorkoutRoutine>,
+  {},
 );

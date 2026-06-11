@@ -1,6 +1,6 @@
 # Workout
 
-Workout is a React + TypeScript + Vite starter app configured with Tailwind CSS and ESLint.
+Workout is a React + TypeScript + Vite app for browsing typed workout routines with exercise media, modifications, and safety guidance.
 
 ## Prerequisites
 
@@ -45,6 +45,10 @@ npm run preview
 
 - `index.html` is the Vite HTML entry point.
 - `src/main.tsx` mounts the React application.
-- `src/App.tsx` contains the starter UI.
+- `src/App.tsx` renders the workout overview experience.
+- `src/components/WorkoutOverview.tsx` displays a selected workout routine from the shared data model.
+- `src/components/ExerciseCard.tsx` renders exercise prescriptions, instructions, modifications, safety tips, and media previews.
+- `src/data/workouts.ts` contains sample workout routines.
+- `src/types/workout.ts` defines shared workout and exercise types.
 - `src/styles.css` loads Tailwind CSS directives and global styles.
 - `tailwind.config.js` and `postcss.config.js` configure the styling pipeline.

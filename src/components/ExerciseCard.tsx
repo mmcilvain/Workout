@@ -1,216 +1,102 @@
-import React from "react";
-import MediaDemo, { MediaDemoProps } from "./MediaDemo";
-
-export type ExerciseMedia = MediaDemoProps;
-
-export interface Exercise {
-  id?: string;
-  name: string;
-  muscleGroup: string;
-  instructions: string[];
-  sets?: number;
-  reps?: string;
-  time?: string;
-  rest?: string;
-  media?: ExerciseMedia;
-  beginnerModification: string;
-  safetyTip: string;
-}
+import MediaDemo from './MediaDemo'
+import { resolveExerciseMedia, type WorkoutExercise } from '../types/workout'
 
 export interface ExerciseCardProps {
-  exercise: Exercise;
-  phaseLabel?: string;
+  exercise: WorkoutExercise
 }
 
-function formatPrescription(exercise: Exercise) {
+function formatPrescription(exercise: WorkoutExercise) {
   const pieces = [
     exercise.sets
-      ? `${exercise.sets} set${exercise.sets === 1 ? "" : "s"}`
+      ? `${exercise.sets} set${exercise.sets === 1 ? '' : 's'}`
       : null,
     exercise.reps,
-    exercise.time,
-  ].filter(Boolean);
+    exercise.duration,
+  ].filter(Boolean)
 
-  return pieces.length > 0 ? pieces.join(" • ") : "Move for quality reps";
+  return pieces.length > 0 ? pieces.join(' • ') : 'Move for quality reps'
 }
 
-export function ExerciseCard({ exercise, phaseLabel }: ExerciseCardProps) {
+export function ExerciseCard({ exercise }: ExerciseCardProps) {
+  const media = resolveExerciseMedia(exercise)
+
   return (
     <article
-      style={{
-        background: "#ffffff",
-        border: "1px solid #e5e7eb",
-        borderRadius: 24,
-        boxShadow: "0 18px 45px rgba(15, 23, 42, 0.08)",
-        display: "grid",
-        gap: 20,
-        overflow: "hidden",
-        padding: 20,
-      }}
+      className="grid gap-5 overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10"
     >
-      <div
-        style={{
-          alignItems: "flex-start",
-          display: "grid",
-          gap: 16,
-          gridTemplateColumns: "minmax(220px, 0.9fr) minmax(260px, 1.1fr)",
-        }}
-      >
+      <div className="grid gap-4 lg:grid-cols-[minmax(220px,0.9fr)_minmax(260px,1.1fr)] lg:items-start">
         <MediaDemo
           alt={`${exercise.name} demonstration`}
-          caption={exercise.media?.caption}
-          src={exercise.media?.src}
-          type={exercise.media?.type}
+          caption={`${exercise.mediaType.toUpperCase()} demonstration`}
+          src={media.url}
+          type={media.type}
         />
 
-        <div style={{ display: "grid", gap: 16 }}>
-          <header style={{ display: "grid", gap: 8 }}>
-            {phaseLabel ? (
-              <span
-                style={{
-                  color: "#2563eb",
-                  fontSize: 13,
-                  fontWeight: 800,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                }}
-              >
-                {phaseLabel}
-              </span>
-            ) : null}
-            <div
-              style={{
-                alignItems: "center",
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 10,
-              }}
-            >
-              <h3
-                style={{
-                  color: "#111827",
-                  fontSize: 24,
-                  lineHeight: 1.1,
-                  margin: 0,
-                }}
-              >
+        <div className="grid gap-4">
+          <header className="grid gap-2">
+            <span className="text-xs font-extrabold uppercase tracking-[0.08em] text-blue-600">
+              {exercise.category}
+            </span>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h3 className="m-0 text-2xl font-bold leading-tight text-slate-900">
                 {exercise.name}
               </h3>
-              <span
-                style={{
-                  background: "#eef2ff",
-                  borderRadius: 999,
-                  color: "#3730a3",
-                  fontSize: 13,
-                  fontWeight: 700,
-                  padding: "6px 10px",
-                }}
-              >
+              <span className="rounded-full bg-indigo-50 px-2.5 py-1.5 text-xs font-bold text-indigo-800">
                 {exercise.muscleGroup}
+              </span>
+              <span className="rounded-full bg-slate-100 px-2.5 py-1.5 text-xs font-bold text-slate-700">
+                {exercise.difficulty}
               </span>
             </div>
           </header>
 
-          <dl
-            style={{
-              display: "grid",
-              gap: 12,
-              gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
-              margin: 0,
-            }}
-          >
-            <div
-              style={{ background: "#f9fafb", borderRadius: 14, padding: 12 }}
-            >
-              <dt
-                style={{
-                  color: "#6b7280",
-                  fontSize: 12,
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                }}
-              >
+          <dl className="m-0 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl bg-slate-50 p-3">
+              <dt className="text-xs font-extrabold uppercase text-slate-500">
                 Sets / reps / time
               </dt>
-              <dd
-                style={{ color: "#111827", fontWeight: 800, margin: "6px 0 0" }}
-              >
+              <dd className="m-0 mt-1.5 font-extrabold text-slate-900">
                 {formatPrescription(exercise)}
               </dd>
             </div>
-            <div
-              style={{ background: "#f9fafb", borderRadius: 14, padding: 12 }}
-            >
-              <dt
-                style={{
-                  color: "#6b7280",
-                  fontSize: 12,
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                }}
-              >
+            <div className="rounded-2xl bg-slate-50 p-3">
+              <dt className="text-xs font-extrabold uppercase text-slate-500">
                 Rest
               </dt>
-              <dd
-                style={{ color: "#111827", fontWeight: 800, margin: "6px 0 0" }}
-              >
-                {exercise.rest ?? "As needed"}
+              <dd className="m-0 mt-1.5 font-extrabold text-slate-900">
+                {exercise.rest}
               </dd>
             </div>
           </dl>
 
-          <section
-            aria-labelledby={`${exercise.id ?? exercise.name}-instructions`}
-          >
+          <section aria-labelledby={`${exercise.name}-instructions`}>
             <h4
-              id={`${exercise.id ?? exercise.name}-instructions`}
-              style={{ color: "#111827", margin: "0 0 8px" }}
+              className="m-0 mb-2 text-base font-bold text-slate-900"
+              id={`${exercise.name}-instructions`}
             >
               Instructions
             </h4>
-            <ol style={{ color: "#374151", margin: 0, paddingLeft: 20 }}>
+            <ol className="m-0 list-decimal space-y-1.5 pl-5 text-slate-700">
               {exercise.instructions.map((instruction) => (
-                <li key={instruction} style={{ marginBottom: 6 }}>
-                  {instruction}
-                </li>
+                <li key={instruction}>{instruction}</li>
               ))}
             </ol>
           </section>
         </div>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gap: 12,
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-        }}
-      >
-        <aside
-          style={{
-            background: "#ecfdf5",
-            borderRadius: 16,
-            color: "#065f46",
-            padding: 14,
-          }}
-        >
-          <strong>Beginner modification</strong>
-          <p style={{ margin: "6px 0 0" }}>{exercise.beginnerModification}</p>
+      <div className="grid gap-3 md:grid-cols-2">
+        <aside className="rounded-2xl bg-emerald-50 p-3.5 text-emerald-800">
+          <strong>Modification</strong>
+          <p className="m-0 mt-1.5">{exercise.modification}</p>
         </aside>
-        <aside
-          style={{
-            background: "#fff7ed",
-            borderRadius: 16,
-            color: "#9a3412",
-            padding: 14,
-          }}
-        >
+        <aside className="rounded-2xl bg-orange-50 p-3.5 text-orange-800">
           <strong>Safety tip</strong>
-          <p style={{ margin: "6px 0 0" }}>{exercise.safetyTip}</p>
+          <p className="m-0 mt-1.5">{exercise.safetyTip}</p>
         </aside>
       </div>
     </article>
-  );
+  )
 }
 
-export default ExerciseCard;
+export default ExerciseCard
